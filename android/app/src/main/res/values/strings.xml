@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Wallet Watcher Pro</string>
+    <string name="app_short_name">WalletWatcher</string>
+    <string name="app_description">Мультичейн дашборд мониторинга кошельков</string>
+    
+    <!-- Permissions rationale -->
+    <string name="permission_internet_rationale">Для загрузки цен и данных блокчейна</string>
+    <string name="permission_notifications_rationale">Для уведомлений о транзакциях</string>
+    <string name="permission_biometric_rationale">Для защиты доступа к кошелькам</string>
+    <string name="permission_storage_rationale">Для экспорта данных</string>
+    
+    <!-- Settings -->
+    <string name="settings_currency">Валюта</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_notifications">Уведомления</string>
+    <string name="settings_security">Безопасность</string>
+    <string name="settings_about">О приложении</string>
+    
+    <!-- Biometric -->
+    <string name="biometric_title">Биометрическая аутентификация</string>
+    <string name="biometric_subtitle">Используйте отпечаток или Face ID</string>
+    <string name="biometric_description">Для доступа к данным кошельков</string>
+    <string name="biometric_negative_button">Отмена</string>
+    
+    <!-- Notifications -->
+    <string name="notification_channel_general">Общие уведомления</string>
+    <string name="notification_channel_transactions">Транзакции</string>
+    <string name="notification_channel_price">Ценовые алерты</string>
+    <string name="notification_channel_security">Безопасность</string>
+</resources>

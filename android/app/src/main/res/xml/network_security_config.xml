@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.coingecko.com</domain>
+        <domain includeSubdomains="true">api.mainnet-beta.solana.com</domain>
+        <domain includeSubdomains="true">ethereum.publicnode.com</domain>
+        <domain includeSubdomains="true">bsc-dataseed.binance.org</domain>
+        <domain includeSubdomains="true">mainnet.base.org</domain>
+        <domain includeSubdomains="true">toncenter.com</domain>
+        <domain includeSubdomains="true">cdn.jsdelivr.net</domain>
+        <domain includeSubdomains="true">fonts.googleapis.com</domain>
+        <domain includeSubdomains="true">fonts.gstatic.com</domain>
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
