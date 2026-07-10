@@ -147,6 +147,9 @@ jobs:
   lint-android:
     name: Android Lint
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wallet-watcher-pro
     steps:
       - uses: actions/checkout@v4
         with:
@@ -173,13 +176,16 @@ jobs:
         if: always()
         with:
           name: lint-results
-          path: android/app/build/reports/lint-results-debug.html
+          path: wallet-watcher-pro/android/app/build/reports/lint-results-debug.html
 
   # Test - runs in parallel (optional, only on PRs)
   test-android:
     name: Android Tests
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    defaults:
+      run:
+        working-directory: wallet-watcher-pro
     steps:
       - uses: actions/checkout@v4
         with:
@@ -216,4 +222,4 @@ jobs:
         if: always()
         with:
           name: test-results
-          path: android/app/build/reports/tests/
+          path: wallet-watcher-pro/android/app/build/reports/tests/
