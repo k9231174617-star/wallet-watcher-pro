@@ -29,9 +29,11 @@ jobs:
     timeout-minutes: 30
     
     steps:
-      # Checkout - no path, just root
+      # Checkout directly to workspace root (path: .)
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          path: .
       
       # Setup Java
       - name: Setup JDK ${{ env.JAVA_VERSION }}
@@ -143,6 +145,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: .
       
       - name: Setup JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
@@ -174,6 +178,8 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: .
       
       - name: Setup JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
