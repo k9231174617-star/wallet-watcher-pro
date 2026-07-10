@@ -27,6 +27,9 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: wallet-watcher-pro
     
     steps:
       # Checkout
@@ -72,28 +75,24 @@ jobs:
       # Install npm dependencies
       - name: Install npm dependencies
         run: npm ci --legacy-peer-deps
-        working-directory: wallet-watcher-pro
       
       # Capacitor sync
       - name: Capacitor sync
         run: npx cap sync android
-        working-directory: wallet-watcher-pro
       
       # Build Debug APK
       - name: Build Debug APK
         if: github.event.inputs.build_type != 'release'
         run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
-        working-directory: wallet-watcher-pro/android
+          chmod +x android/gradlew
+          ./android/gradlew assembleDebug --no-daemon --stacktrace
       
       # Build Release APK
       - name: Build Release APK
         if: github.event.inputs.build_type == 'release' || startsWith(github.ref, 'refs/tags/v')
         run: |
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon --stacktrace
-        working-directory: wallet-watcher-pro/android
+          chmod +x android/gradlew
+          ./android/gradlew assembleRelease --no-daemon --stacktrace
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
@@ -145,6 +144,9 @@ jobs:
   lint-android:
     name: Android Lint
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wallet-watcher-pro/android
     steps:
       - uses: actions/checkout@v4
       
@@ -163,7 +165,6 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew lintDebug --no-daemon
-        working-directory: wallet-watcher-pro/android
       
       - name: Upload Lint Results
         uses: actions/upload-artifact@v4
@@ -177,6 +178,9 @@ jobs:
     name: Android Tests
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    defaults:
+      run:
+        working-directory: wallet-watcher-pro/android
     steps:
       - uses: actions/checkout@v4
       
@@ -205,7 +209,6 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew testDebugUnitTest --no-daemon
-        working-directory: wallet-watcher-pro/android
       
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
