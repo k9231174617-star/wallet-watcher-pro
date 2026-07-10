@@ -29,7 +29,7 @@ jobs:
     timeout-minutes: 30
     
     steps:
-      # Checkout directly to workspace root (path: .)
+      # Checkout to workspace root
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -71,27 +71,27 @@ jobs:
       
       # Install npm dependencies
       - name: Install npm dependencies
-        run: npm ci --legacy-peer-deps
-        working-directory: wallet-watcher-pro
+        run: cd wallet-watcher-pro && npm ci --legacy-peer-deps
       
       # Capacitor sync
       - name: Capacitor sync
-        run: npx cap sync android
-        working-directory: wallet-watcher-pro
+        run: cd wallet-watcher-pro && npx cap sync android
       
       # Build Debug APK
       - name: Build Debug APK
         if: github.event.inputs.build_type != 'release'
         run: |
-          chmod +x wallet-watcher-pro/android/gradlew
-          ./wallet-watcher-pro/android/gradlew assembleDebug --no-daemon --stacktrace
+          cd wallet-watcher-pro
+          chmod +x android/gradlew
+          ./android/gradlew assembleDebug --no-daemon --stacktrace
       
       # Build Release APK
       - name: Build Release APK
         if: github.event.inputs.build_type == 'release' || startsWith(github.ref, 'refs/tags/v')
         run: |
-          chmod +x wallet-watcher-pro/android/gradlew
-          ./wallet-watcher-pro/android/gradlew assembleRelease --no-daemon --stacktrace
+          cd wallet-watcher-pro
+          chmod +x android/gradlew
+          ./android/gradlew assembleRelease --no-daemon --stacktrace
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
@@ -161,8 +161,9 @@ jobs:
       
       - name: Run Lint
         run: |
-          chmod +x wallet-watcher-pro/android/gradlew
-          ./wallet-watcher-pro/android/gradlew lintDebug --no-daemon
+          cd wallet-watcher-pro
+          chmod +x android/gradlew
+          ./android/gradlew lintDebug --no-daemon
       
       - name: Upload Lint Results
         uses: actions/upload-artifact@v4
@@ -204,8 +205,9 @@ jobs:
       
       - name: Run Unit Tests
         run: |
-          chmod +x wallet-watcher-pro/android/gradlew
-          ./wallet-watcher-pro/android/gradlew testDebugUnitTest --no-daemon
+          cd wallet-watcher-pro
+          chmod +x android/gradlew
+          ./android/gradlew testDebugUnitTest --no-daemon
       
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
