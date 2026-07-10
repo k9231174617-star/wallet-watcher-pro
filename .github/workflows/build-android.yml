@@ -19,7 +19,6 @@ on:
 
 env:
   JAVA_VERSION: '17'
-  GRADLE_VERSION: '8.5'
   ANDROID_SDK_VERSION: '34'
   NODE_VERSION: '20'
 
@@ -28,9 +27,6 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: wallet-watcher-pro
     
     steps:
       # Checkout
@@ -53,7 +49,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: wallet-watcher-pro/package-lock.json
       
       # Setup Android SDK
       - name: Setup Android SDK
@@ -71,17 +66,19 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('wallet-watcher-pro/android/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
       
       # Install npm dependencies
       - name: Install npm dependencies
         run: npm ci --legacy-peer-deps
+        working-directory: wallet-watcher-pro
       
       # Capacitor sync
       - name: Capacitor sync
         run: npx cap sync android
+        working-directory: wallet-watcher-pro
       
       # Build Debug APK
       - name: Build Debug APK
@@ -145,13 +142,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Lint check
+  # Lint check (separate job, no emulator needed)
   lint-android:
     name: Android Lint
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: wallet-watcher-pro/android
     steps:
       - uses: actions/checkout@v4
       
@@ -170,6 +164,7 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew lintDebug --no-daemon
+        working-directory: wallet-watcher-pro/android
       
       - name: Upload Lint Results
         uses: actions/upload-artifact@v4
@@ -178,13 +173,10 @@ jobs:
           name: lint-results
           path: wallet-watcher-pro/android/app/build/reports/lint-results-debug.html
 
-  # Test
+  # Test (with emulator)
   test-android:
     name: Android Tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: wallet-watcher-pro/android
     steps:
       - uses: actions/checkout@v4
       
@@ -203,9 +195,8 @@ jobs:
           ndk-version: r26c
       
       - name: Start Emulator
-        uses: android-actions/start-emulator@v3
+        uses: reactivecircus/android-emulator-runner@v2
         with:
-          avd-name: test
           api-level: ${{ env.ANDROID_SDK_VERSION }}
           arch: x86_64
           force-avd-creation: true
@@ -214,6 +205,7 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew testDebugUnitTest --no-daemon
+        working-directory: wallet-watcher-pro/android
       
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
