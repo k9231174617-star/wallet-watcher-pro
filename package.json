@@ -29,9 +29,9 @@
   "author": "Wallet Watcher Pro",
   "license": "MIT",
   "dependencies": {
+    "@aparajita/capacitor-biometric-auth": "^6.0.0",
     "@capacitor/app": "^6.0.0",
-    "@capacitor/background-runner": "^6.0.0",
-    "@capacitor/biometric-auth": "^6.0.0",
+    "@capacitor/background-runner": "^2.3.1",
     "@capacitor/clipboard": "^6.0.0",
     "@capacitor/core": "^6.0.0",
     "@capacitor/device": "^6.0.0",
