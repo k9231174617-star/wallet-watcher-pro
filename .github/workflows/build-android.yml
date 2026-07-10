@@ -19,6 +19,7 @@ on:
 
 env:
   JAVA_VERSION: '17'
+  GRADLE_VERSION: '8.5'
   ANDROID_SDK_VERSION: '34'
   NODE_VERSION: '20'
 
@@ -49,6 +50,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+          cache-dependency-path: wallet-watcher-pro/package-lock.json
       
       # Setup Android SDK
       - name: Setup Android SDK
@@ -66,7 +68,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('wallet-watcher-pro/android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
       
@@ -142,7 +144,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Lint check (separate job, no emulator needed)
+  # Lint check - runs in parallel
   lint-android:
     name: Android Lint
     runs-on: ubuntu-latest
@@ -173,10 +175,11 @@ jobs:
           name: lint-results
           path: wallet-watcher-pro/android/app/build/reports/lint-results-debug.html
 
-  # Test (with emulator)
+  # Test - runs in parallel (optional, takes long)
   test-android:
     name: Android Tests
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'  # only on PRs to save time
     steps:
       - uses: actions/checkout@v4
       
@@ -195,8 +198,9 @@ jobs:
           ndk-version: r26c
       
       - name: Start Emulator
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: android-actions/start-emulator@v3
         with:
+          avd-name: test
           api-level: ${{ env.ANDROID_SDK_VERSION }}
           arch: x86_64
           force-avd-creation: true
