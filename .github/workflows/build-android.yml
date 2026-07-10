@@ -20,15 +20,13 @@ on:
 env:
   JAVA_VERSION: '17'
   ANDROID_SDK_VERSION: '34'
-  NODE_VERSION: '20'
+  NODE_VERSION: '22'
 
 jobs:
   build-android:
     name: Build Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
     
     steps:
       # Checkout to workspace root (NO working-directory here!)
