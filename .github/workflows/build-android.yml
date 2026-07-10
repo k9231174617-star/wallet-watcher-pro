@@ -19,7 +19,6 @@ on:
 
 env:
   JAVA_VERSION: '17'
-  GRADLE_VERSION: '8.5'
   ANDROID_SDK_VERSION: '34'
   NODE_VERSION: '20'
 
@@ -44,13 +43,11 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'gradle'
       
-      # Setup Node.js
+      # Setup Node.js (without npm cache to avoid errors)
       - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: wallet-watcher-pro/package-lock.json
       
       # Setup Android SDK
       - name: Setup Android SDK
@@ -175,11 +172,11 @@ jobs:
           name: lint-results
           path: wallet-watcher-pro/android/app/build/reports/lint-results-debug.html
 
-  # Test - runs in parallel (optional, takes long)
+  # Test - runs in parallel (optional, only on PRs)
   test-android:
     name: Android Tests
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'  # only on PRs to save time
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
       
@@ -198,9 +195,8 @@ jobs:
           ndk-version: r26c
       
       - name: Start Emulator
-        uses: android-actions/start-emulator@v3
+        uses: reactivecircus/android-emulator-runner@v2
         with:
-          avd-name: test
           api-level: ${{ env.ANDROID_SDK_VERSION }}
           arch: x86_64
           force-avd-creation: true
