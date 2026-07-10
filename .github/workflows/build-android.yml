@@ -27,9 +27,12 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: wallet-watcher-pro
     
     steps:
-      # Checkout - checkout to workspace root (creates wallet-watcher-pro folder)
+      # Checkout - default creates repo folder in workspace
       - name: Checkout repository
         uses: actions/checkout@v4
       
@@ -47,7 +50,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: wallet-watcher-pro/package-lock.json
+          cache-dependency-path: package-lock.json
       
       # Setup Android SDK
       - name: Setup Android SDK
@@ -65,19 +68,17 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('wallet-watcher-pro/android/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
       
       # Install npm dependencies
       - name: Install npm dependencies
         run: npm ci --legacy-peer-deps
-        working-directory: wallet-watcher-pro
       
       # Capacitor sync
       - name: Capacitor sync
         run: npx cap sync android
-        working-directory: wallet-watcher-pro
       
       # Build Debug APK
       - name: Build Debug APK
@@ -85,7 +86,6 @@ jobs:
         run: |
           chmod +x android/gradlew
           bash android/gradlew assembleDebug --no-daemon --stacktrace
-        working-directory: wallet-watcher-pro
       
       # Build Release APK
       - name: Build Release APK
@@ -93,7 +93,6 @@ jobs:
         run: |
           chmod +x android/gradlew
           bash android/gradlew assembleRelease --no-daemon --stacktrace
-        working-directory: wallet-watcher-pro
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
@@ -145,6 +144,9 @@ jobs:
   lint-android:
     name: Android Lint
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wallet-watcher-pro
     steps:
       - uses: actions/checkout@v4
       
@@ -161,8 +163,8 @@ jobs:
       
       - name: Run Lint
         run: |
-          chmod +x wallet-watcher-pro/android/gradlew
-          bash wallet-watcher-pro/android/gradlew lintDebug --no-daemon
+          chmod +x android/gradlew
+          bash android/gradlew lintDebug --no-daemon
       
       - name: Upload Lint Results
         uses: actions/upload-artifact@v4
@@ -176,6 +178,9 @@ jobs:
     name: Android Tests
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    defaults:
+      run:
+        working-directory: wallet-watcher-pro
     steps:
       - uses: actions/checkout@v4
       
@@ -202,8 +207,8 @@ jobs:
       
       - name: Run Unit Tests
         run: |
-          chmod +x wallet-watcher-pro/android/gradlew
-          bash wallet-watcher-pro/android/gradlew testDebugUnitTest --no-daemon
+          chmod +x android/gradlew
+          bash android/gradlew testDebugUnitTest --no-daemon
       
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
