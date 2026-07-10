@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Wallet Watcher Pro</title>
+<meta name="description" content="Мультичейн дашборд мониторинга кошельков в неоновом киберпанк стиле">
+<meta name="theme-color" content="#00f5ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Wallet Watcher Pro">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- GRID BACKGROUND -->
+<div class="grid-bg"></div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ADD WALLET MODAL
+════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="add-wallet-modal" onclick="if(event.target===this)closeAddWallet()">
+  <div class="modal neon-border-anim">
+    <div class="modal-title">+ ДОБАВИТЬ КОШЕЛЁК</div>
+    <div class="modal-sub">Выберите сеть и введите адрес для отслеживания</div>
+
+    <div style="margin-bottom:14px">
+      <div class="form-label">Сеть</div>
+      <div class="network-selector">
+        <div class="net-btn selected" data-net="sol"><span class="emoji">◎</span>SOL</div>
+        <div class="net-btn" data-net="eth"><span class="emoji">⬡</span>ETH</div>
+        <div class="net-btn" data-net="bsc"><span class="emoji">🔶</span>BSC</div>
+        <div class="net-btn" data-net="base"><span class="emoji">🔷</span>BASE</div>
+        <div class="net-btn" data-net="ton"><span class="emoji">💎</span>TON</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Название (опционально)</label>
+      <input id="wallet-label-input" class="form-input" placeholder="напр. Основной кошелёк">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Адрес кошелька</label>
+      <input id="wallet-addr-input" class="form-input" placeholder="Вставьте адрес...">
+      <div id="addr-hint" style="font-size:11px;color:var(--text-muted);margin-top:6px">
+        Base58 адрес (32-44 символа): напр. 9WzDXwBb...
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Уведомлять о транзакциях</label>
+      <select class="form-select" style="width:100%">
+        <option>Все транзакции</option>
+        <option>Только входящие</option>
+        <option>Только исходящие</option>
+        <option>Только > $100</option>
+        <option>Только > $1,000</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" style="flex:1" onclick="saveWallet()">✓ Добавить и мониторить</button>
+      <button class="btn btn-ghost" onclick="closeAddWallet()">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     WALLET DETAIL OVERLAY
+════════════════════════════════════════════════════════════ -->
+<div id="wallet-detail-overlay" class="modal-overlay" style="opacity:0;pointer-events:none" onclick="if(event.target===this)closeWalletDetail()">
+  <div class="modal" style="width:600px;max-height:85vh;overflow-y:auto">
+    <!-- Header -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span class="wallet-network sol" id="wd-net">SOL</span>
+          <span style="font-family:var(--font-display);font-size:15px;font-weight:700" id="wd-label">Wallet</span>
+        </div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-bottom:12px;word-break:break-all" id="wd-addr"></div>
+        <div style="display:flex;align-items:baseline;gap:10px">
+          <span style="font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--neon-cyan)" id="wd-usd">$0</span>
+          <span class="stat-change up" id="wd-change">+0%</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="copyAddress(document.getElementById('wd-addr').textContent)">📋 Копировать</button>
+        <button class="btn btn-ghost" onclick="closeWalletDetail()">✕</button>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Tabs -->
+    <div class="filter-tabs" style="margin-bottom:16px">
+      <div class="filter-tab active" onclick="wdTab('tokens',this)">🪙 Токены</div>
+      <div class="filter-tab" onclick="wdTab('txs',this)">📋 Транзакции</div>
+    </div>
+
+    <!-- Tokens Tab -->
+    <div id="wd-tab-tokens">
+      <div style="display:grid;gap:12px" id="wd-tokens-grid"></div>
+    </div>
+
+    <!-- Transactions Tab -->
+    <div id="wd-tab-txs" style="display:none">
+      <div style="display:grid;gap:8px" id="wd-txs-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN APP LAYOUT
+════════════════════════════════════════════════════════════ -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">◎</div>
+      <div>
+        <div class="logo-text">WALLET <span>WATCHER</span></div>
+        <div class="logo-sub">PRO v1.0</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Навигация</div>
+      <div class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+      </div>
+      <div class="nav-item" data-page="wallets" onclick="navigateTo('wallets')">
+        <span class="nav-icon">👛</span>
+        <span>Кошельки</span>
+      </div>
+      <div class="nav-item" data-page="transactions" onclick="navigateTo('transactions')">
+        <span class="nav-icon">📋</span>
+        <span>Транзакции</span>
+      </div>
+      <div class="nav-item" data-page="notifications" onclick="navigateTo('notifications')">
+        <span class="nav-icon">🔔</span>
+        <span>Уведомления</span>
+        <span class="nav-badge" id="notif-badge" style="display:none">3</span>
+      </div>
+      <div class="nav-item" data-page="market" onclick="navigateTo('market')">
+        <span class="nav-icon">📈</span>
+        <span>Рынок</span>
+      </div>
+      <div class="nav-item" data-page="settings" onclick="navigateTo('settings')">
+        <span class="nav-icon">⚙️</span>
+        <span>Настройки</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Мониторинг</div>
+      <div id="sidebar-wallets" style="display:flex;flex-direction:column;gap:6px;padding:0 8px"></div>
+    </div>
+
+    <div style="margin-top:auto;padding:16px;border-top:1px solid var(--border-subtle)">
+      <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-bottom:8px">
+        Последнее обновление: <span id="last-update" style="color:var(--neon-green)">—</span>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button class="btn btn-ghost" onclick="fetchLivePrices()" style="flex:1;font-size:12px">🔄 Обновить цены</button>
+        <button class="btn btn-primary" onclick="openAddWallet()" style="flex:1;font-size:12px">+ Кошелёк</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" style="display:flex;flex-direction:column;min-height:100vh">
+
+    <!-- HEADER -->
+    <header class="header" style="height:var(--header-h);background:var(--bg-panel);border-bottom:1px solid var(--border-glow);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100">
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="btn btn-ghost" onclick="toggleSidebar()" style="display:none" id="menu-btn">☰</button>
+        <h1 class="page-title" id="page-title" style="font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:0.02em">Dashboard</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <!-- Live Ticker -->
+        <div class="live-ticker" id="live-ticker" style="display:none">
+          <div class="ticker-wrap" id="ticker-wrap"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:12px;color:var(--text-muted)">
+            <span id="next-update">30</span>с
+          </div>
+          <button class="btn btn-ghost" onclick="openAddWallet()" style="padding:8px 16px">+ Добавить</button>
+        </div>
+      </div>
+    </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <div class="page-content" style="flex:1;padding:24px;overflow-y:auto" id="page-content">
+      <!-- Pages rendered dynamically -->
+    </div>
+
+  </main>
+</div>
+
+<!-- SERVICE WORKER REGISTRATION -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => {
+          console.log('[SW] Registered:', reg.scope);
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                showToast('info', 'Обновление доступно', 'Перезагрузите страницу для применения');
+              }
+            });
+          });
+        })
+        .catch(err => console.warn('[SW] Registration failed:', err));
+    });
+  }
+
+  // PWA install prompt
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Show install button if needed
+  });
+
+  function installPWA() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choice) => {
+        if (choice.outcome === 'accepted') {
+          showToast('success', 'Установлено', 'Wallet Watcher Pro добавлен на главный экран');
+        }
+        deferredPrompt = null;
+      });
+    }
+  }
+</script>
+
+<script src="js/app.js"></script>
+<script src="js/capacitor-bridge.js"></script>
+</body>
+</html>

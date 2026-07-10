@@ -9,6 +9,7 @@ import android.webkit.JavascriptInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+import android.os.Build;
 
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.PluginHandle;
