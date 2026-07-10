@@ -18,7 +18,6 @@ on:
           - release
 
 env:
-        ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
   JAVA_VERSION: '17'
   ANDROID_SDK_VERSION: '34'
   NODE_VERSION: '20'
@@ -28,6 +27,8 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
     
     steps:
       # Checkout to workspace root (NO working-directory here!)
@@ -44,16 +45,13 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'gradle'
       
-      # Setup Node.js with allow unsecured version
+      # Setup Node.js
       - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: wallet-watcher-pro/package-lock.json
-        env:
-        ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
-          ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
       
       # Setup Android SDK
       - name: Setup Android SDK
@@ -101,7 +99,6 @@ jobs:
           bash android/gradlew assembleRelease --no-daemon --stacktrace
         working-directory: wallet-watcher-pro
         env:
-        ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
@@ -146,7 +143,6 @@ jobs:
           draft: false
           prerelease: false
         env:
-        ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Lint check - runs in parallel
