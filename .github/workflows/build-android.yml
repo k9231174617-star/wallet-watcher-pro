@@ -27,16 +27,11 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: wallet-watcher-pro
     
     steps:
       # Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
       
       # Setup Java
       - name: Setup JDK ${{ env.JAVA_VERSION }}
@@ -75,10 +70,12 @@ jobs:
       # Install npm dependencies
       - name: Install npm dependencies
         run: npm ci --legacy-peer-deps
+        working-directory: wallet-watcher-pro
       
       # Capacitor sync
       - name: Capacitor sync
         run: npx cap sync android
+        working-directory: wallet-watcher-pro
       
       # Build Debug APK
       - name: Build Debug APK
@@ -86,6 +83,7 @@ jobs:
         run: |
           chmod +x android/gradlew
           ./android/gradlew assembleDebug --no-daemon --stacktrace
+        working-directory: wallet-watcher-pro
       
       # Build Release APK
       - name: Build Release APK
@@ -93,6 +91,7 @@ jobs:
         run: |
           chmod +x android/gradlew
           ./android/gradlew assembleRelease --no-daemon --stacktrace
+        working-directory: wallet-watcher-pro
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
