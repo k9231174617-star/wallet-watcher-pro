@@ -29,11 +29,9 @@ jobs:
     timeout-minutes: 30
     
     steps:
-      # Checkout directly to workspace root
+      # Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          path: .
       
       # Setup Java
       - name: Setup JDK ${{ env.JAVA_VERSION }}
@@ -65,17 +63,19 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('wallet-watcher-pro/android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
       
       # Install npm dependencies
       - name: Install npm dependencies
         run: npm ci --legacy-peer-deps
+        working-directory: wallet-watcher-pro
       
       # Capacitor sync
       - name: Capacitor sync
         run: npx cap sync android
+        working-directory: wallet-watcher-pro
       
       # Build Debug APK
       - name: Build Debug APK
@@ -83,6 +83,7 @@ jobs:
         run: |
           chmod +x android/gradlew
           ./android/gradlew assembleDebug --no-daemon --stacktrace
+        working-directory: wallet-watcher-pro
       
       # Build Release APK
       - name: Build Release APK
@@ -90,6 +91,7 @@ jobs:
         run: |
           chmod +x android/gradlew
           ./android/gradlew assembleRelease --no-daemon --stacktrace
+        working-directory: wallet-watcher-pro
         env:
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
@@ -102,7 +104,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wallet-watcher-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: wallet-watcher-pro/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
       
       # Upload Release APK
@@ -111,7 +113,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wallet-watcher-release-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          path: wallet-watcher-pro/android/app/build/outputs/apk/release/app-release.apk
           retention-days: 90
       
       # Upload Release AAB (for Play Store)
@@ -120,7 +122,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wallet-watcher-release-aab
-          path: android/app/build/outputs/bundle/release/app-release.aab
+          path: wallet-watcher-pro/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 90
       
       # Create Release
@@ -129,8 +131,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            android/app/build/outputs/apk/release/app-release.apk
-            android/app/build/outputs/bundle/release/app-release.aab
+            wallet-watcher-pro/android/app/build/outputs/apk/release/app-release.apk
+            wallet-watcher-pro/android/app/build/outputs/bundle/release/app-release.aab
           generate_release_notes: true
           draft: false
           prerelease: false
@@ -143,8 +145,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: .
       
       - name: Setup JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
@@ -159,15 +159,15 @@ jobs:
       
       - name: Run Lint
         run: |
-          chmod +x android/gradlew
-          ./android/gradlew lintDebug --no-daemon
+          chmod +x wallet-watcher-pro/android/gradlew
+          ./wallet-watcher-pro/android/gradlew lintDebug --no-daemon
       
       - name: Upload Lint Results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: lint-results
-          path: android/app/build/reports/lint-results-debug.html
+          path: wallet-watcher-pro/android/app/build/reports/lint-results-debug.html
 
   # Test - runs in parallel (optional, only on PRs)
   test-android:
@@ -176,8 +176,6 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: .
       
       - name: Setup JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
@@ -202,12 +200,12 @@ jobs:
       
       - name: Run Unit Tests
         run: |
-          chmod +x android/gradlew
-          ./android/gradlew testDebugUnitTest --no-daemon
+          chmod +x wallet-watcher-pro/android/gradlew
+          ./wallet-watcher-pro/android/gradlew testDebugUnitTest --no-daemon
       
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
-          path: android/app/build/reports/tests/
+          path: wallet-watcher-pro/android/app/build/reports/tests/
