@@ -32,7 +32,7 @@ jobs:
         working-directory: wallet-watcher-pro
     
     steps:
-      # Checkout - checkout to workspace root with path: .
+      # Checkout - explicit path to create wallet-watcher-pro folder in workspace root
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -150,6 +150,9 @@ jobs:
   lint-android:
     name: Android Lint
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wallet-watcher-pro
     steps:
       - uses: actions/checkout@v4
         with:
@@ -168,8 +171,9 @@ jobs:
       
       - name: Run Lint
         run: |
-          chmod +x wallet-watcher-pro/android/gradlew
-          bash wallet-watcher-pro/android/gradlew lintDebug --no-daemon
+          chmod +x android/gradlew
+          bash android/gradlew lintDebug --no-daemon
+        working-directory: wallet-watcher-pro
       
       - name: Upload Lint Results
         uses: actions/upload-artifact@v4
@@ -183,6 +187,9 @@ jobs:
     name: Android Tests
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    defaults:
+      run:
+        working-directory: wallet-watcher-pro
     steps:
       - uses: actions/checkout@v4
         with:
@@ -211,8 +218,9 @@ jobs:
       
       - name: Run Unit Tests
         run: |
-          chmod +x wallet-watcher-pro/android/gradlew
-          bash wallet-watcher-pro/android/gradlew testDebugUnitTest --no-daemon
+          chmod +x android/gradlew
+          bash android/gradlew testDebugUnitTest --no-daemon
+        working-directory: wallet-watcher-pro
       
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
