@@ -27,9 +27,6 @@ jobs:
     name: Build Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: wallet-watcher-pro
     
     steps:
       # Checkout - explicit path to create wallet-watcher-pro folder in workspace root
@@ -150,9 +147,6 @@ jobs:
   lint-android:
     name: Android Lint
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: wallet-watcher-pro
     steps:
       - uses: actions/checkout@v4
         with:
@@ -187,9 +181,6 @@ jobs:
     name: Android Tests
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    defaults:
-      run:
-        working-directory: wallet-watcher-pro
     steps:
       - uses: actions/checkout@v4
         with:
