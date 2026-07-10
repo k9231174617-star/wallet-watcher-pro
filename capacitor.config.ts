@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.walletwatcher.pro',
   appName: 'Wallet Watcher Pro',
-  webDir: '.',
+  webDir: 'wallet-watcher-pro',
   server: {
     androidScheme: 'https',
     cleartext: false,
