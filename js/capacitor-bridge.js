@@ -30,7 +30,7 @@ async function loadPlugins() {
     const { LocalNotifications: LN } = await import('@capacitor/local-notifications');
     LocalNotifications = LN;
     
-    const { BiometricAuth: BA } = await import('@capacitor/biometric-auth');
+    const { BiometricAuth: BA } = await import('@aparajita/capacitor-biometric-auth');
     BiometricAuth = BA;
     
     const { BackgroundRunner: BR } = await import('@capacitor/background-runner');

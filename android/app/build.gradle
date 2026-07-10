@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-an
+		dirs '../../node_modules/@capacitor/background-runner/android/src/main/libs', 'libs'droid'
 apply plugin: 'kotlin-android-extensions'
 
 android {
